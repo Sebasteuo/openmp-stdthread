@@ -1,0 +1,8 @@
+bin/
+build/
+*.o
+results/*.png
+results/*.csv
+results/raw/*
+__pycache__/
+.DS_Store
