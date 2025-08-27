@@ -1,8 +1,6 @@
 bin/
 build/
 *.o
-results/*.png
-results/*.csv
-results/raw/*
+results/raw/
 __pycache__/
 .DS_Store
