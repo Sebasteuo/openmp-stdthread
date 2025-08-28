@@ -1,1 +1,0 @@
-# Notas iniciales del informe
