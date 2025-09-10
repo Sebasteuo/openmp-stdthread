@@ -61,9 +61,9 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Agrega CSV de benchmarks y genera gráficos (tiempo, speedup, eficiencia)."
     )
-    p.add_argument("csv", nargs="?", default="results/raw/last.csv",
+    p.add_argument("csv", nargs="?", default="../results/raw/last.csv",
                    help="Ruta del CSV de entrada (por defecto: results/raw/last.csv).")
-    p.add_argument("--outdir", default="results",
+    p.add_argument("--outdir", default="../results",
                    help="Carpeta de salida para CSVs y PNGs (default: results).")
     p.add_argument("--metric", default="total_ms",
                    choices=["total_ms","gen_ms","hist_ms"],

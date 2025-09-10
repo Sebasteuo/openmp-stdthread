@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
+# Captura la ruta absoluta del directorio del script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
 # Ejecuta baterías y guarda CSV en results/raw + last.csv
 set -euo pipefail
 
 BACKEND="both"   # openmp|threads|both
-N=5000000        # pequeño para VM (valida flujo)
+N=100000000        # 5 000 000 pequeño para VM (valida flujo)
 MIN=0; MAX=255
 REPS=1           # repeticiones por punto
 THREADS=""       # si vacío: 1,2,4,... hasta nproc
 SEED=42
-OUTDIR="results/raw"; mkdir -p "$OUTDIR"
+OUTDIR="../results/raw"; mkdir -p "$OUTDIR"
 ts=$(date +%Y%m%d_%H%M%S)
 CSV="$OUTDIR/run_${ts}.csv"
 
@@ -42,7 +45,8 @@ run_openmp () {
     for t in $SET; do
       for r in $(seq 1 $REPS); do
         echo "[OpenMP] var=$variant t=$t r=$r N=$N"
-        OMP_NUM_THREADS=$t ./bin/hist_openmp --n $N --min $MIN --max $MAX \
+        # perf record -o "$OUTDIR/openmp_${variant}_t${t}_r${r}.data"
+        OMP_NUM_THREADS=$t "$SCRIPT_DIR"/bin/hist_openmp --n $N --min $MIN --max $MAX \
           --variant $variant --seed $SEED --rep 1 >> "$CSV"
       done
     done
@@ -54,7 +58,8 @@ run_threads () {
     for t in $SET; do
       for r in $(seq 1 $REPS); do
         echo "[threads] var=$variant t=$t r=$r N=$N"
-        ./bin/hist_threads --n $N --threads $t --min $MIN --max $MAX \
+        # perf stat -o /dev/tty --append
+        perf record -o "$OUTDIR/threads_${variant}_t${t}_r${r}.data" "$SCRIPT_DIR"/bin/hist_threads --n $N --threads $t --min $MIN --max $MAX \
           --variant $variant --seed $SEED --rep 1 >> "$CSV"
       done
     done
