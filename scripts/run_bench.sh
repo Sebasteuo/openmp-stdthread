@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 set -euo pipefail
 
 BACKEND="both"   # openmp|threads|both
-N=100000000        # 5 000 000 pequeño para VM (valida flujo)
+N=150000000        # 5 000 000 pequeño para VM (valida flujo)
 MIN=0; MAX=255
 REPS=1           # repeticiones por punto
 THREADS=""       # si vacío: 1,2,4,... hasta nproc
@@ -45,8 +45,13 @@ run_openmp () {
     for t in $SET; do
       for r in $(seq 1 $REPS); do
         echo "[OpenMP] var=$variant t=$t r=$r N=$N"
+        # perf presenta la opcion de reporte rapido (stat) y reporte detallado (record/report)
+        # Para tener un reporte mas detallado tiene que cambiar,
+        # perf stat -o /dev/tty --append
+        # por, 
         # perf record -o "$OUTDIR/openmp_${variant}_t${t}_r${r}.data"
-        OMP_NUM_THREADS=$t "$SCRIPT_DIR"/bin/hist_openmp --n $N --min $MIN --max $MAX \
+        export OMP_NUM_THREADS=$t 
+        perf stat -o /dev/tty --append "$SCRIPT_DIR"/bin/hist_openmp --n $N --min $MIN --max $MAX \
           --variant $variant --seed $SEED --rep 1 >> "$CSV"
       done
     done
@@ -58,8 +63,11 @@ run_threads () {
     for t in $SET; do
       for r in $(seq 1 $REPS); do
         echo "[threads] var=$variant t=$t r=$r N=$N"
+        # Para tener un reporte mas detallado tiene que cambiar,
         # perf stat -o /dev/tty --append
-        perf record -o "$OUTDIR/threads_${variant}_t${t}_r${r}.data" "$SCRIPT_DIR"/bin/hist_threads --n $N --threads $t --min $MIN --max $MAX \
+        # por, 
+        # perf record -o "$OUTDIR/threads_${variant}_t${t}_r${r}.data"
+        perf stat -o /dev/tty --append "$SCRIPT_DIR"/bin/hist_threads --n $N --threads $t --min $MIN --max $MAX \
           --variant $variant --seed $SEED --rep 1 >> "$CSV"
       done
     done
